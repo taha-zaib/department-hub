@@ -8,13 +8,33 @@ const departmentSchema = new mongoose.Schema({
         type: String,
         required: [true, "Department name is required"],
         trim: true,
-        maxLength: [100, "Department name cannot exceed 100 characters"]
+        minlength: [2, "Department name must be at least 2 characters long"],
+        maxLength: [100, "Department name cannot exceed 100 characters"],
+
+        validate: {
+            validator: function(name) {
+                // check if its a valid name
+                const allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -&.()"
+
+                // loop through the name to find if any invalid character
+                for(let i = 0; i < name.length; i++) {
+                    if(!allowedChars.includes(name[i])) {
+                        return false;
+                    }
+                }
+
+                return true; // all characters valid
+            },
+            message: "Department name can only contain letters, numbers, spaces, hyphens, and periods"
+        }
+
     },
     university: {
-        type: true,
+        type: String,
         required: [true, "University name is required"],
         trim: true,
-        maxLength: [150, "University name annot exceed 150 characters"]
+        minLength: [2, "University name must be at least 2 characters long"],
+        maxLength: [150, "University name cannot exceed 150 characters"]
     },
     contactEmail: {
         type: String,
@@ -24,10 +44,22 @@ const departmentSchema = new mongoose.Schema({
         trim: true,
         validate: {
             validator: function(email) {
-                return email.includes("@") &&
-                       email.includes(".") &&
-                       email.indexOF("@") < email.lastIndexOf(".") &&
-                       email.length > 5;
+                if (!email.includes("@")) return false;
+                if (!email.includes(".")) return false;
+                if (email.length < 6) return false;
+
+                const atIndex = email.indexOf("@");
+                const lastDotIndex = email.lastIndexOf(".");
+
+                // "@" should come before "."
+                if (atIndex >= lastDotIndex) return false;
+                // "@" cannot be the first character
+                if (atIndex === 0) return false;
+                // email must have something after the last dot
+                if (lastDotIndex === email.length - 1) return false;
+
+                return true;
+
             },
             message: "Please enter a valid email address"
         }
@@ -36,15 +68,52 @@ const departmentSchema = new mongoose.Schema({
         type: String,
         required: [true, "Contact person name is required"],
         trim: true,
-        maxLength: [100, "Contact persom name cannot exceed 100 characters"]
+        minLength: [2, "Contact person name must be at least 2 characters long"],
+        maxLength: [100, "Contact persom name cannot exceed 100 characters"],
+
+        validate: {
+            validator: function(name) {
+                // check if its a valid name
+                const allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -'."
+
+                // loop through the name to find if any invalid character
+                for(let i = 0; i < name.length; i++) {
+                    if(!allowedChars.includes(name[i])) {
+                        return false;
+                    }
+                }
+
+                // name should contain at least one letter
+                const hasLetter = name.split("").some(char => {
+                    const lowerChar = char.toLowerCase();
+                    return lowerChar >= 'a' && lowerChar <= 'z';
+                });
+
+                return hasLetter;
+            },
+            message: "Contact person name can only contain letters, spaces, hyphens, and apostrophes"
+        }
+
     },
     status: {
         type: String,
-        eum: ["pending", "approved", "rejected"],
+        eum: {
+            values: ["pending", "approved", "rejected"],
+            message: "Status must be either pending, approved, or rejected"
+        },
         default: "pending"
     },
     adminPassword: {
-        type: String
+        type: String,
+        validate: {
+            validator: function(password) {
+                // only validate the password if it exists - skip validation if no password
+                if (!password) return true;
+
+                return password.length >= 6 && password.length <= 100;
+            },
+            message: "Password must be between 6 and 100 characters long"
+        }
     }, // will be set after approval
     approvalToken: {
         type: String
