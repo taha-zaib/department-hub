@@ -1,18 +1,26 @@
-import express from "express"
+import express from 'express'
 import connectDB from './config/database.js'
-import "dotenv/config"
-import handleDatabaseErrors from "./middleware/databaseErrorHandler.js";
+import 'dotenv/config'
+import handleDatabaseErrors from './middleware/databaseErrorHandler.js';
+import departmentRoutes from './routes/departmentRoutes.js'
+import mongoose from 'mongoose';
 
 const app = express();
+
+
+// connect to mongoDB database
+connectDB();
+
 
 // middleware to parse JSON
 app.use(express.json())
 
-// connection of mongoDB database
-connectDB();
+
+// DEPARTMENT ROUTES
+app.use('/api/departments', departmentRoutes)
 
 
-// routes - test endpoint
+// test endpoint
 app.get("/api/test", (req, res) => {
     res.json({
         message: "Backend is working!",
@@ -20,7 +28,8 @@ app.get("/api/test", (req, res) => {
     })
 })
 
-// database error handler
+
+// DATABASE ERROR HANDLER
 app.use(handleDatabaseErrors)
 
 

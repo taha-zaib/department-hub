@@ -36,9 +36,9 @@ const departmentSchema = new mongoose.Schema({
         minLength: [2, "University name must be at least 2 characters long"],
         maxLength: [150, "University name cannot exceed 150 characters"]
     },
-    contactEmail: {
+    email: {
         type: String,
-        required: [true, "Contact email is required"],
+        required: [true, "Email is required"],
         unique: true,
         lowercase: true,
         trim: true,
@@ -64,11 +64,11 @@ const departmentSchema = new mongoose.Schema({
             message: "Please enter a valid email address"
         }
     },
-    contactPerson: {
+    admin: {
         type: String,
-        required: [true, "Contact person name is required"],
+        required: [true, "Admin name is required"],
         trim: true,
-        minLength: [2, "Contact person name must be at least 2 characters long"],
+        minLength: [2, "Admin name must be at least 2 characters long"],
         maxLength: [100, "Contact persom name cannot exceed 100 characters"],
 
         validate: {
@@ -91,13 +91,13 @@ const departmentSchema = new mongoose.Schema({
 
                 return hasLetter;
             },
-            message: "Contact person name can only contain letters, spaces, hyphens, and apostrophes"
+            message: "Admin name can only contain letters, spaces, hyphens, and apostrophes"
         }
 
     },
     status: {
         type: String,
-        eum: {
+        enum: {
             values: ["pending", "approved", "rejected"],
             message: "Status must be either pending, approved, or rejected"
         },
